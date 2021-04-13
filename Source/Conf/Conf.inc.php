@@ -9,8 +9,11 @@ if (!defined('SITE')) exit('Access Denied');
 //定义整个应用在操作系统中的目录
 define('PATH_APP',dirname(dirname(dirname(__FILE__))));
 //定义核心文件目录
-define('PATH_SOURCE',PATH_APP.DIRECTORY_SEPARATOR.'Source');
-//定义模块所在目录
-define('PATH_MODULE',PATH_SOURCE.DIRECTORY_SEPARATOR.MODULE);
-var_dump(PATH_MODULE);
+define('PATH_SOURCE',PATH_APP.'/'.'Source');
+//定义当前模块所在目录
+define('PATH_MODULE',PATH_SOURCE.'/'.MODULE);
+//定义默认控制器参数名
+define('INDEX_CONTROLLER','c');
+//定义默认操作参数名
+define('INDEX_METHOD','m');
 

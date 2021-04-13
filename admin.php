@@ -8,4 +8,4 @@
 //定义令牌文件 防止直接执行
 define('SITE','site');
 define('MODULE','Admin');
-require './Source/Conf/Conf.inc.php';
+require './Source/Conf/Action.inc.php';
