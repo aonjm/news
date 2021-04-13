@@ -18,6 +18,7 @@ class Factory
      */
     protected static function create($type = null)
     {
+        //使用class_exists  是为了能触发自动加载
         if (class_exists($type)){
             return new $type;
         }else{

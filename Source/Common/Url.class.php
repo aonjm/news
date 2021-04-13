@@ -6,11 +6,14 @@
  * Time: 19:05
  * URL解析类
  */
+
 namespace Common;
 class Url
 {
     private static $controller;
     private static $method;
+    const DEFAULT_MODE = 0;
+    const PATH_INFO_MODE = 1;
 
     /**
      *初始化，分步解析URL
@@ -18,6 +21,13 @@ class Url
      */
     private static function init()
     {
+        switch (URL_MODE) {
+            case self::DEFAULT_MODE:
+                break;
+            case self::PATH_INFO_MODE:
+                if (isset($_SERVER['PATH_INFO'])) self::parsePathInfo();
+                break;
+        }
         self::parseUrl();
     }
 
@@ -36,6 +46,32 @@ class Url
         self::$controller = ucfirst($_GET[INDEX_CONTROLLER]);
         self::$method = $_GET[INDEX_METHOD];
 
+    }
+
+    /**
+     * pathInfo 解析
+     *
+     */
+    private static function parsePathInfo()
+    {
+        // index/index/id/12/name/tom
+        preg_match_all('/([^\/]+)\/([^\/]+)/',$_SERVER['PATH_INFO'],$data);
+        if (count($data[0])){
+            foreach ($data[0] as $key=>$val){
+                $tmp = explode('/',$val);
+                if ($key == 0){
+                    $_GET[INDEX_CONTROLLER] = $tmp[0];
+                    $_GET[INDEX_METHOD] = $tmp[1];
+                }else{
+                    $_GET[$tmp[0]] = $tmp[1];
+                }
+            }
+        }else{
+            $data = explode('/',$_SERVER['PATH_INFO']);
+            if (isset($data[1])){
+                $_GET[INDEX_CONTROLLER] = $data[1];
+            }
+        }
     }
 
     /**

@@ -31,3 +31,9 @@ function loadCommon($className){
 
     }
 }
+
+function pr($args){
+    echo "<pre>";
+    var_dump($args);
+    exit;
+}

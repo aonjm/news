@@ -8,4 +8,5 @@
 //定义令牌文件 防止直接执行
 define('SITE','site');
 define('MODULE','Admin');
+define('URL_MODE',1);
 require './Source/Conf/Action.inc.php';
