@@ -4,6 +4,7 @@
  * User: 54879490@qq.com
  * Date: 2017/8/27
  * Time: 20:48
+ * 控制器基类
  */
 namespace Common;
 class Controller

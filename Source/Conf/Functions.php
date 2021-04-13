@@ -4,6 +4,7 @@
  * User: 54879490@qq.com
  * Date: 2017/8/27
  * Time: 18:00
+ * 方法库
  */
 if (!defined('SITE')) exit('Access Denied');
 //按命名空间自动加载
