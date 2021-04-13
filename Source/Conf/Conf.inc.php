@@ -12,6 +12,8 @@ define('PATH_APP',dirname(dirname(dirname(__FILE__))));
 define('PATH_SOURCE',PATH_APP.'/'.'Source');
 //定义当前模块所在目录
 define('PATH_MODULE',PATH_SOURCE.'/'.MODULE);
+//定义公共路径
+define('PATH_COMMON',PATH_SOURCE.'/'.'Common');
 //定义默认控制器参数名
 define('INDEX_CONTROLLER','c');
 //定义默认操作参数名

@@ -8,8 +8,7 @@
 
 namespace Admin\Controller;
 
-
-use Common\Controller\Controller;
+use Common\Controller;
 
 class IndexController extends Controller
 {

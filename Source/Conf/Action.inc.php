@@ -9,4 +9,10 @@ if (!defined('SITE')) exit('Access Denied');
 require 'Conf.inc.php';
 require 'Functions.php';
 spl_autoload_register('loadAbs');
-echo \Common\Url::getM();
+spl_autoload_register('loadCommon');
+try{
+    $method = \Common\Url::getM();
+    \Common\ControllerFactory::create()->$method();
+}catch (Exception $e){
+    echo $e->getMessage();
+}
