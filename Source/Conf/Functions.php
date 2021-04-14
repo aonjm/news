@@ -16,7 +16,6 @@ function loadAbs($className){
 }
 //加载common命名空间下的class
 function loadCommon($className){
-
     foreach (scandir(PATH_COMMON) as $val){
         if ($val == '.' || $val == '..' || is_file(PATH_COMMON.'/'.$val)){
             continue;
@@ -28,7 +27,6 @@ function loadCommon($className){
             require $path;
             return true;
         }
-
     }
 }
 

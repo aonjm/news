@@ -14,6 +14,9 @@ class IndexController extends Controller
 {
     public function index()
     {
-        echo 'test........';
+        $this->view->setData('name','xiawei');
+        $this->view->setData('sex','男');
+        $this->view->setData('from','湖北');
+        $this->view->display();
     }
 }
