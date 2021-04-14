@@ -9,6 +9,7 @@
 namespace Admin\Controller;
 
 use Common\Controller;
+use Common\Db;
 
 class IndexController extends Controller
 {
@@ -18,5 +19,10 @@ class IndexController extends Controller
         $this->view->setData('sex','男');
         $this->view->setData('from','湖北');
         $this->view->display();
+    }
+
+    public function test(){
+        new Db();
+        echo 'test..........';
     }
 }
