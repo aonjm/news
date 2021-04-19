@@ -22,7 +22,22 @@ class IndexController extends Controller
     }
 
     public function test(){
-        new Db();
-        echo 'test..........';
+        $config = [
+            'password'=>'root',
+            'database'=>'news'
+        ];
+        $db = new Db($config);
+        $sql = "insert test(name,pic) values(?,?)";
+        $data = [
+            'name'=>'测试插入数据',
+            'pic'=>'测试插入数据',
+        ];
+        $params = [
+            'sql'=>$sql,
+            'bind' =>['ss',$data]
+        ];
+        $db->execute($params);
+        pr($db->getLastInsId());
+
     }
 }
