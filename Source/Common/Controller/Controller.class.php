@@ -11,6 +11,7 @@ namespace Common;
 class Controller
 {
     protected $view;
+    protected $model;
 
     public function __construct()
     {

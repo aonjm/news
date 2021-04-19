@@ -25,3 +25,13 @@ define('INDEX_METHOD', 'm');
 //url模式
 defined('URL_MODE') ? null : define('URL_MODE', 0);
 
+//数据库配置
+
+
+define('DB_HOST','localhost');
+define('DB_USER','root');
+define('DB_PASSWORD','root');
+define('DB_DATABASE','news');
+define('DB_PORT',3306);
+define('DB_CHARSET','utf8');
+define('DB_PREFIX','');

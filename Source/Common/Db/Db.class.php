@@ -12,7 +12,7 @@ class Db extends \mysqli
 {
     private $config = array(
         'host' => 'localhost',
-        'username' => 'root',
+        'user' => 'root',
         'password' => '',
         'database' => '',
         'port' => 3306,
@@ -23,10 +23,11 @@ class Db extends \mysqli
     public function __construct($config = array())
     {
         $config = $this->config = array_merge($this->config, $config);
-        @parent::mysqli($config['host'], $config['username'], $config['password'], $config['database'], $config['port']);
+        @parent::mysqli($config['host'], $config['user'], $config['password'], $config['database'], $config['port']);
         if ($this->connect_errno) {
-            $this->dbError($this->connect_error);
+            $this->dError($this->connect_error);
         }
+        $this->set_charset($config['charset']);
     }
 
     /**
@@ -50,7 +51,7 @@ class Db extends \mysqli
                 }
                 array_unshift($tmp, $params['bind'][0]);
                 if (!@call_user_func_array([$stmt, 'bind_param'], $tmp)) {
-                    $this->dbError('参数绑定失败');
+                    $this->dError('参数绑定失败');
                 }
             }
             $stmt->execute();
@@ -60,7 +61,7 @@ class Db extends \mysqli
             $this->lastInsId = $stmt->insert_id;
             return $stmt->affected_rows;
         } else {
-            $this->dbError($stmt->error);
+            $this->dError($stmt->error);
         }
     }
 
@@ -74,7 +75,7 @@ class Db extends \mysqli
         return $this->lastInsId;
     }
 
-    private function dbError($error)
+    private function dError($error)
     {
         throw new \Exception($error);
     }
