@@ -28,7 +28,6 @@ class Controller
     {
         exit("<span style='font-size: 100px;'>:((</span><br>method <span style='color: red'>'{$name}'</span> doesn't exist");
     }
-
-
+    
 
 }

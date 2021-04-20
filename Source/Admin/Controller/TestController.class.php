@@ -22,6 +22,18 @@ class TestController extends Controller
 
     public function index()
     {
-       // echo "test......";
+
+    }
+
+    public function add()
+    {
+        $data = [
+            'id'=>18,
+            'name'=>'php真的很牛逼',
+            'pic'=>'hello world',
+            'dfdsafdsa'=>'dsafdasf'
+        ];
+        var_dump($this->model->add($data));
+        var_dump($this->model->getError());
     }
 }

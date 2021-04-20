@@ -68,9 +68,9 @@ class Model
     {
         $this->db = new Db($this->parseConfig());
         //$data = ['id' => 10, 'name' => '测试插入数据dafdafadsfdasfasas', 'pic' => 'dfadsafdasfsaf'];
-       /* $this->setCTime(self::SELECT);
-        var_dump($this->validate($data));
-        var_dump($this->getError());*/
+        /* $this->setCTime(self::SELECT);
+         var_dump($this->validate($data));
+         var_dump($this->getError());*/
 
     }
 
@@ -460,7 +460,13 @@ class Model
         return $this->error;
     }
 
-    //获取当前字段的当前验证规则类型的验证时机
+    /**
+     * 获取当前字段的当前验证规则类型的验证时机
+     *
+     * @param $field
+     * @param $ruleType
+     * @return array
+     */
     protected function getVTime($field, $ruleType)
     {
         //如果存在设置的验证时机
@@ -476,8 +482,48 @@ class Model
         }
     }
 
+    /**
+     * 设置当前的验证时机
+     *
+     * @param $type
+     */
     public function setCTime($type)
     {
         $this->cTime = $type;
     }
+
+    public function add($data,$autoValidate = true)
+    {
+        if ($autoValidate){
+            $this->setCTime(self::INSERT);
+            if (!$this->validate($data)){
+                return false;
+            }
+        }
+        if (isset($data[$this->getPk()])){
+            unset($data[$this->getPk()]);
+        }
+        $fieldsType = '';
+        foreach ($data as $key=>$val){
+            if (!in_array($key,$this->getFields())){
+                unset($data[$key]);
+                continue;
+            }
+
+            $fieldsType .= $this->getFieldType($key);
+        }
+        if (!count($data)){
+            $this->error = '无合法数据.';
+            return false;
+        }
+        $fieldsNameList = implode(',',array_keys($data));
+        $fieldsValuesList = implode(',',array_fill(0,count($data),'?'));
+        $params = [
+            'sql'=>"INSERT INTO {$this->getTableName()}({$fieldsNameList}) VALUES({$fieldsValuesList})",
+            'bind'=>[$fieldsType,$data]
+        ];
+        return $this->db->execute($params);
+    }
+
+
 }
