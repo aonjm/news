@@ -32,13 +32,13 @@ class Model
     protected $vMessageD = [
         'null' => '{field}不能为空',
         'type' => '{field}数据类型不对',
-        'between' => '{filed}的值必须介于{rule}',
-        'not between' => '{filed}不得介于{rule}',
-        'in' => '{filed}必须属于{rule}',
-        'not in' => '{filed}不得属于{rule}',
-        'length' => '{filed}的长度必须介于{rule}',
-        'unique' => '{filed}中已经存在{value}',
-        'regex' => '{filed}包含非法字符',
+        'between' => '{field}的值必须介于{rule}',
+        'not between' => '{field}不得介于{rule}',
+        'in' => '{field}必须属于{rule}',
+        'not in' => '{field}不得属于{rule}',
+        'length' => '{field}的长度必须介于{rule}',
+        'unique' => '{field}中已经存在{value}',
+        'regex' => '{field}包含非法字符',
         'function' => '{field}没有通过函数{function}的验证',
         'method' => '{field}没有通过方法{method}的验证',
         'equal' => '{field}必须等于{rule}',
@@ -65,7 +65,8 @@ class Model
     public function __construct()
     {
         $this->db = new Db($this->parseConfig());
-        $data = ['id' => 100, 'name' => '', 'pic' => 'dfadsafdasfsaf'];
+        $data = ['id' => 10, 'name' => '', 'pic' => 'dfadsafdasfsaf'];
+        echo "<pre>";
         var_dump($this->validate($data));
         var_dump($this->getError());
 
@@ -177,9 +178,16 @@ class Model
         foreach ($this->getValidate() as $key => $val) {
             if (array_key_exists($key, $data)) {
                 //如果数据中存在某个字段
-                if ($data[$key] == '') {
-                    $this->error = $this->getValidateMessage($key, 'null');
-                    return false;
+                var_dump($val);
+                foreach ($val as $ruleType => $rule) {
+                    //如果不存在验证规则
+                    if ($ruleType == 'null') continue;
+                    //对具体的某条规则进行检查
+                    if (!$this->check($data[$key], $ruleType, $rule)) {
+                        $this->error = $this->getValidateMessage($key, $ruleType, $rule, $data[$key]);
+                        return false;
+                    }
+
                 }
             } else {
                 //默认字段验证规则
@@ -193,11 +201,73 @@ class Model
     }
 
     /**
+     * 对传入的值进行具体的某项规则的验证
+     *
+     * @param $value  实际传入的值
+     * @param $ruleType  验证规则的名称
+     * @param $rule    实际写的验证规则
+     * @return bool
+     */
+    protected function check($value, $ruleType, $rule)
+    {
+        switch ($ruleType) {
+            case 'type':
+                if ($rule == 'i') {
+                    return is_numeric($value);
+                } else if ($rule == 's') {
+                    return is_string($value);
+                } else {
+                    return true;
+                }
+                break;
+            case 'between':
+                $between = explode(',', $rule);
+                return $value >= $between[0] && $value <= $between[1];
+                break;
+            case 'not between':
+                $not_between = explode(',', $rule);
+                return $value < $not_between[0] || $value > $not_between[1];
+                break;
+            case 'in':
+                $in = explode(',', $rule);
+                return in_array($value, $in);
+                break;
+            case 'not in':
+                $not_in = explode(',', $rule);
+                return !in_array($value, $not_in);
+                break;
+            case 'length':
+                $length = explode(',', $rule);
+                $valueLen = mb_strlen($value, 'utf-8');
+                if (count($length) == 1) {
+                    return $valueLen <= $length[0];
+                } elseif (count($length) == 2) {
+                    return $valueLen >= $length[0] && $valueLen <= $length[1];
+                }
+                break;
+            case 'unique':
+                break;
+            case 'regex':
+                break;
+            case 'function':
+                break;
+            case 'method':
+                break;
+            case 'equal':
+                break;
+            case 'not equal':
+                break;
+            case 'confirm':
+                break;
+        }
+    }
+
+    /**
      * 获取验证提示信息
      *
      * @param $field  字段的名称
-     * @param $ruleType   字段的验证规则值
-     * @param null $rule 字段验证规则键
+     * @param $ruleType   字段的验证规则的类型值
+     * @param null $rule 字段验证规则你填的值
      * @param null $val 字段符合的值
      * @return mixed
      */
@@ -209,12 +279,11 @@ class Model
         } else {
             $message = $this->vMessageD[$ruleType];
         }
-        //执行替换
         if (strpos($message, '{field}') !== false) {
             $message = str_replace('{field}', $this->getValidateAlias($field), $message);
         }
         if (strpos($message, '{rule}') !== false) {
-            $message = str_replace('{rule}', $ruleType, $message);
+            $message = str_replace('{rule}', $rule, $message);
         }
         if (strpos($message, '{value}') !== false) {
             $message = str_replace('{value}', $val, $message);

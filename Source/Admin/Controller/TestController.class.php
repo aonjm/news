@@ -22,6 +22,6 @@ class TestController extends Controller
 
     public function index()
     {
-        echo "test......";
+       // echo "test......";
     }
 }

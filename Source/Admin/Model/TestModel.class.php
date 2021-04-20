@@ -43,7 +43,7 @@ class TestModel extends Model
             'name'=>[
                 'null'=>false,
                 'type'=>'s',
-                'in'=>'值1,值二,...',
+                //'in'=>'值1,值二,...',
                 'length'=>'5,10',
                 'unique'=>false,
                 'function'=>['test',[1,2,3]]
@@ -62,10 +62,10 @@ class TestModel extends Model
         $this->vMessage = [
             'id'=>[
                 'type'=>'id必须是一个数字',
-                'between'=>'id值必须在某个范围'
+                'between'=>'id值必须在0,1000范围'
             ],
             'name'=>[
-                'in'=>'name必须在某个范围内'
+
             ],
             'pic'=>[
                 'null'=>'图片不能为空',
