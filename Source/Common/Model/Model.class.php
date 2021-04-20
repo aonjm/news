@@ -22,10 +22,7 @@ class Model
     protected $pk;
     public $error;
 
-    //规则的验证时机
-    protected $vTime;
-    //默认的验证时机
-    protected $vTimeD = [self::INSERT, self::DELETE, self::UPDATE, self::SELECT];
+
     //验证不通过的自定义提示语句
     protected $vMessage;
     //验证不通过的默认提示语句
@@ -38,7 +35,7 @@ class Model
         'not in' => '{field}不得属于{rule}',
         'length' => '{field}的长度必须介于{rule}',
         'unique' => '{field}中已经存在{value}',
-        'regex' => '{field}包含非法字符',
+        'regex' => '{field}不符合正则',
         'function' => '{field}没有通过函数{function}的验证',
         'method' => '{field}没有通过方法{method}的验证',
         'equal' => '{field}必须等于{rule}',
@@ -55,7 +52,12 @@ class Model
 
     //合并后的验证规则
     protected $trueValidate;
-
+    //规则的验证时机
+    protected $vTime;
+    //默认的验证时机
+    protected $vTimeD = [self::INSERT, self::DELETE, self::UPDATE, self::SELECT];
+    //当前的验证时机
+    protected $cTime;
     //定义验证时机常量
     const INSERT = 1;
     const DELETE = 2;
@@ -65,10 +67,10 @@ class Model
     public function __construct()
     {
         $this->db = new Db($this->parseConfig());
-        $data = ['id' => 10, 'name' => '', 'pic' => 'dfadsafdasfsaf'];
-        echo "<pre>";
+        //$data = ['id' => 10, 'name' => '测试插入数据dafdafadsfdasfasas', 'pic' => 'dfadsafdasfsaf'];
+       /* $this->setCTime(self::SELECT);
         var_dump($this->validate($data));
-        var_dump($this->getError());
+        var_dump($this->getError());*/
 
     }
 
@@ -178,26 +180,43 @@ class Model
         foreach ($this->getValidate() as $key => $val) {
             if (array_key_exists($key, $data)) {
                 //如果数据中存在某个字段
-                var_dump($val);
                 foreach ($val as $ruleType => $rule) {
                     //如果不存在验证规则
                     if ($ruleType == 'null') continue;
-                    //对具体的某条规则进行检查
-                    if (!$this->check($data[$key], $ruleType, $rule)) {
-                        $this->error = $this->getValidateMessage($key, $ruleType, $rule, $data[$key]);
-                        return false;
+                    /*****************************************/
+                    //判断当前字段的验证时机是否包含了当前设置的验证时机
+                    /*****************************************/
+                    if (in_array($this->cTime, $this->getVTime($key, $ruleType))) {
+                        $tmp = $data[$key];
+                        if ($ruleType == 'unique') {
+                            $tmp = [
+                                'fieldName' => $key,
+                                'fieldValue' => $data[$key]
+                            ];
+                        }
+                        if ($ruleType == 'confirm') {
+                            $tmp = [$data[$rule], $data[$key]];
+                        }
+                        //对具体的某条规则进行检查
+                        if (!$this->check($tmp, $ruleType, $rule)) {
+                            $this->error = $this->getValidateMessage($key, $ruleType, $rule, $data[$key]);
+                            return false;
+                        }
                     }
 
                 }
             } else {
                 //默认字段验证规则
                 //1、先验证是否可以为空
-                if (!$val['null']) {
-                    $this->error = $this->getValidateMessage($key, 'null');
-                    return false;
+                if (in_array($this->cTime, $this->getVTime($key, 'null'))) {
+                    if (!$val['null']) {
+                        $this->error = $this->getValidateMessage($key, 'null');
+                        return false;
+                    }
                 }
             }
         }
+        return true;
     }
 
     /**
@@ -246,19 +265,56 @@ class Model
                 }
                 break;
             case 'unique':
-                break;
-            case 'regex':
-                break;
-            case 'function':
-                break;
-            case 'method':
+                if ($rule) {
+                    //如果设定了true  即该字段必须唯一  那么就需要从数据库查询是否存在该值
+                    $field = $value['fieldName'];
+                    $fieldValue = $value['fieldValue'];
+                    $params = [
+                        'sql' => "select {$field} from {$this->getTableName()} where {$field}=?",
+                        'bind' => [$this->getFieldType($field), [$fieldValue]]
+                    ];
+                    if (count($this->db->execute($params))) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+
+                } else {
+                    return true;
+                }
                 break;
             case 'equal':
+                return $value == $rule;
                 break;
             case 'not equal':
+                return $value != $rule;
                 break;
             case 'confirm':
+                return $value[0] == $value[1];
                 break;
+            case 'regex':
+                return preg_match($rule, $value);
+                break;
+            case 'function':
+                if (isset($rule[1])) {
+                    $params = $rule[1];
+                    array_unshift($params, $value);
+                } else {
+                    $params = [$value];
+                }
+                return call_user_func_array($rule[0], $params);
+                break;
+            case 'method':
+                if (isset($rule[1])) {
+                    $params = $rule[1];
+                    array_unshift($params, $value);
+                } else {
+                    $params = [$value];
+                }
+                return call_user_func_array([$this, $rule[0]], $params);
+
+                break;
+
         }
     }
 
@@ -287,6 +343,12 @@ class Model
         }
         if (strpos($message, '{value}') !== false) {
             $message = str_replace('{value}', $val, $message);
+        }
+        if (strpos($message, '{function}') !== false) {
+            $message = str_replace('{function}', $rule[0], $message);
+        }
+        if (strpos($message, '{method}') !== false) {
+            $message = str_replace('{method}', $rule[0], $message);
         }
         //function以及method等等需要补充完善.
 
@@ -398,4 +460,24 @@ class Model
         return $this->error;
     }
 
+    //获取当前字段的当前验证规则类型的验证时机
+    protected function getVTime($field, $ruleType)
+    {
+        //如果存在设置的验证时机
+        if (isset($this->vTime[$field][$ruleType])) {
+            if (is_array($this->vTime[$field][$ruleType])) {
+                //如果当前字段的验证时机是个数组的话
+                return $this->vTime[$field][$ruleType];
+            } else {
+                return [$this->vTime[$field][$ruleType]];
+            }
+        } else {
+            return $this->vTimeD;
+        }
+    }
+
+    public function setCTime($type)
+    {
+        $this->cTime = $type;
+    }
 }

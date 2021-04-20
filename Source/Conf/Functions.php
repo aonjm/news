@@ -35,3 +35,11 @@ function pr($args){
     var_dump($args);
     exit;
 }
+
+function test($value,$a,$b,$c){
+    /*var_dump($value);
+    var_dump($a);
+    var_dump($b);
+    var_dump($c);*/
+    return true;
+}

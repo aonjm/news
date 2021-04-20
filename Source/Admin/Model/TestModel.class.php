@@ -43,10 +43,13 @@ class TestModel extends Model
             'name'=>[
                 'null'=>false,
                 'type'=>'s',
-                //'in'=>'值1,值二,...',
-                'length'=>'5,10',
                 'unique'=>false,
-                'function'=>['test',[1,2,3]]
+                'length'=>10
+                //'equal'=>'哈哈',
+                //'confirm'=>'id',
+                //'regex'=>'/^s.*i$/',
+               // 'function'=>['test',[1,2,3]]
+                //'method'=>['hello']
             ],
             'pic'=>[
                 'length'=>'60',
@@ -54,8 +57,10 @@ class TestModel extends Model
             ]
         ];
         $this->vTime = [
-            'id'=>[
-                'not between'=> [self::INSERT, self::DELETE, self::UPDATE, self::SELECT],
+            'name'=>[
+                'length'=> [self::INSERT,
+                    //self::DELETE, self::UPDATE, self::SELECT
+                    ],
             ]
         ];
 
@@ -72,5 +77,10 @@ class TestModel extends Model
             ]
         ];
         parent::__construct();
+    }
+
+
+    public function hello(){
+
     }
 }
