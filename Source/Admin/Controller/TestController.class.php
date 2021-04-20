@@ -20,7 +20,8 @@ class TestController extends Controller
         parent::__construct();
     }
 
-    public function index(){
-
+    public function index()
+    {
+        echo "test......";
     }
 }
